@@ -3,6 +3,8 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.ResizingArrayBag;
 
+import java.util.ArrayList;
+
 public class BruteCollinearPoints {
     private Point[] points;
     private LineSegment[] segments;
@@ -14,37 +16,38 @@ public class BruteCollinearPoints {
             throw new java.lang.NullPointerException();
         }
         this.points = points;
+        ArrayList<Point> collinear;
         for (int i = 0; i < points.length; i++) {
-            boolean getLine = false;
             Point iPoint = points[i];
-
             for (int j = i + 1; j < points.length; j++) {
-//                if (getLine) {
-//                    break;
-//                }
                 Point jPoint = points[j];
+                collinear = new ArrayList<Point>();
+                collinear.add(iPoint);
+                collinear.add(jPoint);
                 for (int k = j + 1; k < points.length; k++) {
-//                    if (getLine) {
-//                        break;
-//                    }
                     Point kPoint = points[k];
-                    //две точки всегда будут на одной прямой
-//                    if (iPoint.slopeOrder().compare(jPoint, kPoint) == 0) {
                     if (iPoint.slopeTo(jPoint) == iPoint.slopeTo(kPoint)) {
-
-                        Point lastPoint = null;
+                        collinear.add(kPoint);
                         for (int l = k + 1; l < points.length; l++) {
                             Point lPoint = points[l];
                             if (iPoint.slopeTo(jPoint) == iPoint.slopeTo(lPoint)) {
+                                collinear.add(lPoint);
 
-                                Point higherPoint = maxPoint(maxPoint(iPoint, jPoint), maxPoint(kPoint, lPoint));
-                                Point lowerPoint = minPoint(minPoint(iPoint, jPoint), minPoint(kPoint, lPoint));
-//                                System.out.println("line of points: " + iPoint + " " + jPoint + " " + kPoint + " " + lPoint + " --- : " + higherPoint + " " + lowerPoint);
-                                LineSegment ls = new LineSegment(lowerPoint, higherPoint);
-                                getLine = true;
-                                segments = addSegment(segments, ls);
-//                                break;
                             }
+                        }
+                        if (collinear.size() >= 4) {
+                            Point higherPoint = collinear.get(0);
+                            Point lowerPoint = collinear.get(0);
+                            for (Point toComp : collinear) {
+                                if (toComp.compareTo(higherPoint) > 0) {
+                                    higherPoint = toComp;
+                                }
+                                if (toComp.compareTo(lowerPoint) < 0) {
+                                    lowerPoint = toComp;
+                                }
+                            }
+                            segments = addSegment(segments, new LineSegment(lowerPoint, higherPoint));
+                            break;
                         }
                     }
                 }
